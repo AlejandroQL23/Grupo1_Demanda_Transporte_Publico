@@ -1,58 +1,48 @@
 import pandas as pd
-# Importar algoritmos de la librería sklearn
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-from sklearn import model_selection
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import KFold
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import SVC
+import pandas as pd
+from sklearn.model_selection import cross_val_score
+import numpy as np
 
 class ModeloML:
-    df_data = pd.read_csv("")
-    df_data.head()
-    df_data.info()
 
-    # Eliminamos la variable de salida(clase) y creamos un df de valores
-    X = df_data.drop('pasajeros', axis=1).values
+    def regresion(self):
+        df_data = pd.read_csv("")
+        df_data.head()
+        df_data.info()
 
-    # Creamos la variable "clase" en un array de valores
-    y = df_data['pasajeros'].values
+        # Eliminamos la variable de salida(cantidad_pasajeros) y creamos un df de valores
+        df_X = df_data.drop('cantidad_pasajeros', axis=1)
+        df_X
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=23,
-                                                        stratify=y)
-    # stratify --> datos_etiquetados
+        df_X = pd.get_dummies(df_X)
+        df_X.head()
 
-    models = [('LR', LogisticRegression()),  # Creamos un array de todos los modelos a probar
-              ('LDA', LinearDiscriminantAnalysis()),
-              ('KNN', KNeighborsClassifier()),
-              ('CART', DecisionTreeClassifier()),
-              ('NB', GaussianNB()),
-              ('SVM', SVC())]
-
-    results = []
-    names = []
-    for name, model in models:
-        # Divide los datos en 10 partes(9 folds de entrenamiento y 1 para probar )
-        # Baraja los datos antes de dividir
-        # El barajado es siempre igual (semilla 23)
-        kf = KFold(n_splits=10, shuffle=True, random_state=23)
-
-        # CV = crossvalidation
-        cv_results = model_selection.cross_val_score(model, X, y, cv=kf)  #
-        results.append(cv_results)
-        names.append(name)
-        msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
-        print(msg)
+        X = df_X.values
+        y = df_data['cantidad_pasajeros'].values
 
 
-        # tomamos los mejores 3 modelos para comparar con cual llegamos al mejor resultado:
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state=42)
 
+        reg = LinearRegression()
+
+        reg.fit(X_train, y_train)
+
+        cv_scores = cross_val_score(reg, X_train, y_train, cv=5)
+
+        # Print the 5-fold cross-validation scores
+        print(cv_scores)
+
+        print("Average 5-Fold CV Score: {}".format(np.mean(cv_scores)))
+
+        y_pred = reg.predict(X_test)
+        y_pred
+
+    def clasificacion(self):
+        df_data = pd.read_csv("")
+        df_data.head()
+        df_data.info()
 
 
 
