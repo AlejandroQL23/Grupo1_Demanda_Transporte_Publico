@@ -1,6 +1,6 @@
 # src/main.py
-from datos.gestor_datos import GestorDatos
 from pathlib import Path
+from src.datos.gestor_datos import GestorDatos
 
 def main():
     print("=== GESTOR DE DATOS — PROYECTO (FILTRAR POR nombreruta: Cartago) ===\n")
