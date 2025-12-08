@@ -1,88 +1,148 @@
+#from src.api.cliente_api import ClienteAPI
+
+
+#def main():
+#    cliente = ClienteAPI(base_url="https://api.11holidays.com")
+#
+#    df = cliente.obtener_datos(
+#        endpoint="/v1/holidays",
+#        params={"country": "CR"}  # parametros
+#    )
+
+#    print(df)
+
+# if __name__ == "__main__":
+#    main()
+
 # src/main.py
+"""
+Main de integración usando rutas ABSOLUTAS.
+Opciones:
+  1) Integrar todos los datos en tabla 'pasajeros'
+  2) Integrar solo Cartago en tabla 'pasajeros_cartago' y guardar CSV filtrado
+"""
+
 from pathlib import Path
-from src.datos.gestor_datos import GestorDatos
+from datos.gestor_datos import GestorDatos
+from basedatos.gestor_base_datos import ConexionSQLite, IntegradorDatos
+
 
 def main():
-    print("=== GESTOR DE DATOS — PROYECTO (FILTRAR POR nombreruta: Cartago) ===\n")
+    print("=== INTEGRACIÓN: CSV -> SQLITE (RUTAS ABSOLUTAS) ===\n")
 
-    # Ajusta ruta_base si tu CSV no está en src (por ejemplo "." o "data/raw")
-    gestor = GestorDatos(ruta_base="src", verbose=True)
+    # ---------- 1. RUTA ABSOLUTA DEL CSV ----------
+    ruta_csv = input("Ingresa la RUTA ABSOLUTA del CSV (ej: C:/Users/.../datos.csv): ").strip()
+    if not ruta_csv:
+        print("No se ingresó ruta. Saliendo.")
+        return
 
+    ruta_csv_abs = Path(ruta_csv).expanduser().resolve()
+    if not ruta_csv_abs.exists():
+        print(f"ERROR: El archivo no existe: {ruta_csv_abs}")
+        return
+
+    # ---------- 2. CARGAR CSV CON GestorDatos ----------
+    # ruta_base="" para que no interfiera con rutas absolutas
+    gestor = GestorDatos(ruta_base="", verbose=True)
+
+    try:
+        gestor.cargar_csv(str(ruta_csv_abs))
+    except Exception as e:
+        print(f"ERROR al cargar el CSV: {e}")
+        return
+
+    resumen = gestor.resumen()
+    print("\nResumen del DataFrame cargado:")
+    print(f" Archivo: {resumen.get('archivo')}")
+    print(f" Filas: {resumen.get('filas')}")
+    print(f" Columnas: {resumen.get('columnas')}")
+    print(f" % Nulos: {resumen.get('porcentaje_nulos')}")
+    print(" Columnas detectadas:", list(resumen.get("columnas_tipos", {}).keys()))
+
+    # ---------- 3. RUTA ABSOLUTA DE LA BD ----------
+    ruta_db = input("\nRuta ABSOLUTA para la DB SQLite (Enter = C:/demanda_transporte.db): ").strip()
+    if not ruta_db:
+        ruta_db_abs = Path("C:/demanda_transporte.db").resolve()
+    else:
+        ruta_db_abs = Path(ruta_db).expanduser().resolve()
+
+    print(f"Usando base de datos: {ruta_db_abs}")
+
+    # Crear conexión e integrador
+    conexion = ConexionSQLite(ruta_db=str(ruta_db_abs))
+    integrador = IntegradorDatos(conexion=conexion)
+
+    # ---------- 4. MENÚ DE INTEGRACIÓN ----------
     while True:
-        print("\n1) Cargar CSV (ej: C:\repos\Grupo1_Demanda_Transporte_Publico\data\raw\datos.csv)")
-        print("2) Mostrar resumen")
-        print("3) Filtrar filas donde 'nombreruta' contenga 'Cartago'")
-        print("4) Guardar dataframe procesado (ruta destino ej: C:\repos\Grupo1_Demanda_Transporte_Publico\data\processed\datos_cartago.csv )")
-        print("5) Ver primeras 5 filas")
-        print("6) Salir")
+        print("\n=== MENÚ DE INTEGRACIÓN ===")
+        print("1) Integrar TODOS los datos en tabla 'pasajeros'")
+        print("2) Integrar SOLO Cartago en tabla 'pasajeros_cartago' y guardar CSV filtrado")
+        print("3) Salir")
 
-        opt = input("Elige opción (1-6): ").strip()
+        opcion = input("Selecciona una opción (1-3): ").strip()
 
-        if opt == "1":
-            nombre = input("Nombre o ruta del CSV [datos.csv]: ").strip() or "datos.csv" #ruta absoluta C:\repos\Grupo1_Demanda_Transporte_Publico\data\raw\datos.csv
+        if opcion == "1":
+            # Integrar todo el DataFrame en la tabla 'pasajeros'
             try:
-                gestor.cargar_csv(nombre_archivo=nombre)
-                print("Archivo cargado correctamente.")
-            except FileNotFoundError:
-                print("ERROR: archivo no encontrado. Revisa ruta_base o poner la ruta absoluta.")
+                filas = integrador.integrar_dataframe(
+                    gestor.dataframe,
+                    nombre_tabla="pasajeros",
+                    chunk_size=500
+                )
+                print(f"\nIntegración COMPLETA terminada. Filas insertadas/actualizadas en 'pasajeros': {filas}")
             except Exception as e:
-                print(f"ERROR al cargar: {e}")
+                print(f"ERROR al integrar todos los datos: {e}")
 
-        elif opt == "2":
-            if gestor.dataframe is None:
-                print("No hay DataFrame cargado.")
-                continue
-            r = gestor.resumen()
-            print(f"\nArchivo: {r['archivo']}")
-            print(f"Filas: {r['filas']}, Columnas: {r['columnas']}, %Nulos: {r['porcentaje_nulos']}")
-            print("Columnas:", list(r['columnas_tipos'].keys()))
-
-        elif opt == "3":
-            if gestor.dataframe is None:
-                print("Carga primero el CSV.")
-                continue
-            col_name = "nombreruta"
-            if col_name not in gestor.dataframe.columns:
-                print(f"No existe la columna '{col_name}'. Columnas actuales: {list(gestor.dataframe.columns)}")
-                continue
-            # Búsqueda case-insensitive por la subcadena 'cartago'
-            mask = gestor.dataframe[col_name].astype(str).str.contains("cartago", case=False, na=False)
-            df_filtrado = gestor.dataframe.loc[mask].copy()
-            gestor._dataframe = df_filtrado  # actualizamos el dataframe interno (simple y directo)
-            gestor.calcular_metricas()
-            print(f"Filtrado aplicado. Filas actuales: {gestor.num_filas}")
-            if gestor.num_filas > 0:
-                print("Ejemplo (primeras 5 filas):")
-                print(gestor.dataframe.head(5))
+        elif opcion == "2":
+            # Integrar solo Cartago
+            # Ruta por defecto para el CSV filtrado
+            ruta_csv_cartago = input(
+                "Ruta ABSOLUTA para guardar el CSV de Cartago "
+                "(Enter = C:/cartago.csv): "
+            ).strip()
+            if not ruta_csv_cartago:
+                ruta_csv_cartago_abs = Path("C:/cartago.csv").resolve()
             else:
-                print("No se encontraron filas con 'Cartago' en 'nombreruta'.")
+                ruta_csv_cartago_abs = Path(ruta_csv_cartago).expanduser().resolve()
 
-        elif opt == "4":
-            if gestor.dataframe is None:
-                print("No hay DataFrame para guardar.")
-                continue
-            ruta = input("Ruta destino (ej: data/processed/datos_cartago.csv): ").strip()
-            if not ruta:
-                print("No ingresaste ruta.")
-                continue
             try:
-                dest = gestor.guardar_dataframe_procesado(ruta, index=False)
-                print(f"Guardado en: {dest}")
+                filas_cartago = integrador.insertar_subconjunto_por_filtro(
+                    df=gestor.dataframe,
+                    columna="nombreruta",
+                    patron="cartago",             # subcadena 'cartago' (no sensible a mayúsculas)
+                    nombre_tabla="pasajeros_cartago",
+                    ruta_csv_guardado=str(ruta_csv_cartago_abs),
+                    regex=False,
+                    case_sensitive=False,
+                    pk_candidata="id",
+                    chunk_size=500
+                )
+                print(
+                    f"\nIntegración Cartago terminada. "
+                    f"Filas insertadas/actualizadas en 'pasajeros_cartago': {filas_cartago}"
+                )
+                print(f"CSV filtrado guardado en: {ruta_csv_cartago_abs}")
             except Exception as e:
-                print(f"ERROR al guardar: {e}")
+                print(f"ERROR al integrar solo Cartago: {e}")
 
-        elif opt == "5":
-            if gestor.dataframe is None:
-                print("No hay DataFrame cargado.")
-                continue
-            print(gestor.dataframe.head(5))
-
-        elif opt == "6":
-            print("Saliendo. ¡Éxitos!")
+        elif opcion == "3":
+            print("\nSaliendo y cerrando conexión...")
             break
-
         else:
             print("Opción inválida. Intenta de nuevo.")
 
+    # ---------- 5. CERRAR CONEXIÓN ----------
+    try:
+        conexion.cerrar()
+    except Exception:
+        pass
+
+    print(f"\nBase de datos final en: {ruta_db_abs}")
+    print("Fin del programa.")
+
+
 if __name__ == "__main__":
     main()
+
+
+
