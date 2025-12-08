@@ -1,8 +1,12 @@
 # src/main.py
 from pathlib import Path
 from src.datos.gestor_datos import GestorDatos
+from src.api.cliente_api import ClienteAPI
+from src.modelos.modeloml import ModeloML
+
 
 def main():
+
     print("=== GESTOR DE DATOS — PROYECTO (FILTRAR POR nombreruta: Cartago) ===\n")
 
     # Ajusta ruta_base si tu CSV no está en src (por ejemplo "." o "data/raw")
@@ -14,9 +18,11 @@ def main():
         print("3) Filtrar filas donde 'nombreruta' contenga 'Cartago'")
         print("4) Guardar dataframe procesado (ruta destino ej: C:\repos\Grupo1_Demanda_Transporte_Publico\data\processed\datos_cartago.csv )")
         print("5) Ver primeras 5 filas")
-        print("6) Salir")
+        print("6) Modelo Regresion Lineal")
+        print("7) Modelo ")
+        print("8) Salir")
 
-        opt = input("Elige opción (1-6): ").strip()
+        opt = input("Elige opción (1-8): ").strip()
 
         if opt == "1":
             nombre = input("Nombre o ruta del CSV [datos.csv]: ").strip() or "datos.csv" #ruta absoluta C:\repos\Grupo1_Demanda_Transporte_Publico\data\raw\datos.csv
@@ -78,6 +84,14 @@ def main():
             print(gestor.dataframe.head(5))
 
         elif opt == "6":
+            modelo1 = ModeloML()
+            df = modelo1.regresion()
+
+        elif opt == "7":
+            modelo1 = ModeloML()
+            df = modelo1.clasificacion()
+
+        elif opt == "8":
             print("Saliendo. ¡Éxitos!")
             break
 
