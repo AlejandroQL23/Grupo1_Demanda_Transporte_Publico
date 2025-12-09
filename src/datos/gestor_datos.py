@@ -231,39 +231,6 @@ class GestorDatos:
             "head": self._dataframe.head(5).to_dict(orient="records") if self._dataframe is not None else []
         }
 
-    def validar_columnas(self, columnas_esperadas: List[str]) -> Dict[str, List[str]]:
-        """
-        Valida que las columnas esperadas estén presentes.
-        Retorna dict con 'faltantes' y 'presentes'.
-        """
-        if self._dataframe is None:
-            raise ValueError("No hay dataframe cargado para validar columnas.")
-
-        presentes = [c for c in columnas_esperadas if c in self._dataframe.columns]
-        faltantes = [c for c in columnas_esperadas if c not in self._dataframe.columns]
-        return {"presentes": presentes, "faltantes": faltantes}
-
-    def seleccionar_columnas(self, columnas: List[str], in_place: bool = True) -> pd.DataFrame:
-        """
-        Selecciona un subconjunto de columnas. Si in_place True modifica self._dataframe.
-        """
-        if self._dataframe is None:
-            raise ValueError("No hay dataframe cargado para seleccionar columnas.")
-
-        faltantes = [c for c in columnas if c not in self._dataframe.columns]
-        if faltantes:
-            msg = f"Las siguientes columnas solicitadas no existen: {faltantes}"
-            self._logger.warning(msg)
-            # elegir: lanzar excepción o ignorar columnas faltantes; aquí ignoramos las faltantes
-            columnas_validas = [c for c in columnas if c in self._dataframe.columns]
-        else:
-            columnas_validas = columnas
-
-        df_nuevo = self._dataframe.loc[:, columnas_validas].copy()
-        if in_place:
-            self._dataframe = df_nuevo
-            self.calcular_metricas()
-        return df_nuevo
 
     def filtrar_por_provincia(
         self,

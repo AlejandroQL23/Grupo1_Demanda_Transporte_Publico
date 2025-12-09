@@ -34,7 +34,7 @@ class ModeloML:
         print("CARGANDO DATOS")
         print("=" * 60)
         cargador = GestorDatos(ruta_base="data/processed")
-        df_data = cargador.cargar_csv("datos_car.csv")
+        df_data = cargador.cargar_csv("cartago.csv")
 
         print(f"\nDimensiones del dataset: {df_data.shape}")
         print(f"\nPrimeras filas:")
@@ -52,7 +52,7 @@ class ModeloML:
         print("PREPARANDO DATOS")
         print("=" * 60)
 
-        df_X = df_data.drop('pasajerosregulares', axis=1)
+        df_X = df_data.drop('pasajerostotales', axis=1)
 
         #  dummies
         #df_X = pd.get_dummies(df_X, drop_first=True)
@@ -64,7 +64,7 @@ class ModeloML:
         self.columnas_features = df_X.columns.tolist()
 
         X = df_X.values
-        y = df_data['pasajerosregulares'].values
+        y = df_data['pasajerostotales'].values
 
         #  train y test
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
@@ -254,7 +254,7 @@ class ModeloML:
         print("CARGANDO DATOS")
         print("=" * 60)
         cargador = GestorDatos(ruta_base="data/processed")
-        df_data = cargador.cargar_csv("datos_car.csv")
+        df_data = cargador.cargar_csv("cartago.csv")
 
         print(f"\nDimensiones del dataset: {df_data.shape}")
         print(f"\nPrimeras filas:")
@@ -264,7 +264,7 @@ class ModeloML:
         df_data.info()
 
         # Calcular cuartiles
-        self.cuartiles = df_data['pasajerosregulares'].quantile([0.25, 0.5, 0.75]).values
+        self.cuartiles = df_data['pasajerostotales'].quantile([0.25, 0.5, 0.75]).values
 
         print(f"\nCuartiles calculados:")
         print(f"Q1 (25%): {self.cuartiles[0]:.0f} pasajeros")
@@ -286,7 +286,7 @@ class ModeloML:
             else:
                 return 'Saturada'
 
-        df_data['ocupacion'] = df_data['pasajerosregulares'].apply(clasificar_ocupacion)
+        df_data['ocupacion'] = df_data['pasajerostotales'].apply(clasificar_ocupacion)
 
         #  distribución de ocupación
         print(f"\nDistribución de niveles de ocupación:")
@@ -296,7 +296,7 @@ class ModeloML:
         print((distribucion / len(df_data) * 100).round(2))
 
         #  porcentaje de ocupación respecto a capacidad
-        df_data['porcentaje_ocupacion'] = (df_data['pasajerosregulares'] / self.capacidad_vehiculo * 100).round(2)
+        df_data['porcentaje_ocupacion'] = (df_data['pasajerostotales'] / self.capacidad_vehiculo * 100).round(2)
 
         print(f"\n--- Rangos de ocupación definidos ---")
         print(
@@ -314,7 +314,7 @@ class ModeloML:
         print("=" * 60)
 
         # a excluir
-        columnas_excluir = ['ocupacion', 'pasajerosregulares', 'porcentaje_ocupacion']
+        columnas_excluir = ['ocupacion', 'pasajerostotales', 'porcentaje_ocupacion']
 
         # separar features y target
         df_X = df_data.drop(columnas_excluir, axis=1)

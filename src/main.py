@@ -83,7 +83,7 @@ def main():
         print("4) Modelo ")
         print("5) Salir")
 
-        opcion = input("Selecciona una opción (1-3): ").strip()
+        opcion = input("Selecciona una opción (1-5): ").strip()
 
         if opcion == "1":
             # Integrar todo el DataFrame en la tabla 'pasajeros'
