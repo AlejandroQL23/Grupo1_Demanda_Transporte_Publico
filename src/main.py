@@ -13,10 +13,10 @@ def main():
     gestor = GestorDatos(ruta_base="src", verbose=True)
 
     while True:
-        print("\n1) Cargar CSV (ej: C:\repos\Grupo1_Demanda_Transporte_Publico\data\raw\datos.csv)")
+        print(r"1) Cargar CSV (ej: C:\repos\Grupo1_Demanda_Transporte_Publico\data\raw\datos.csv)")
         print("2) Mostrar resumen")
         print("3) Filtrar filas donde 'nombreruta' contenga 'Cartago'")
-        print("4) Guardar dataframe procesado (ruta destino ej: C:\repos\Grupo1_Demanda_Transporte_Publico\data\processed\datos_cartago.csv )")
+        print(r"4) Guardar dataframe procesado (ruta destino ej: C:\repos\Grupo1_Demanda_Transporte_Publico\data\processed\datos_cartago.csv )")
         print("5) Ver primeras 5 filas")
         print("6) Modelo Regresion Lineal")
         print("7) Modelo ")
