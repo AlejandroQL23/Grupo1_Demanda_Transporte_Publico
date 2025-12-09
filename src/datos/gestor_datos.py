@@ -24,6 +24,9 @@ import pandas as pd
 import logging
 import os
 
+from src.api.cliente_api import ClienteAPI
+
+
 class GestorDatos:
     def __init__(
         self,
@@ -289,6 +292,17 @@ class GestorDatos:
             mask = self._dataframe[columna_provincia].astype(str) == str(valor_provincia)
 
         df_filtrado = self._dataframe.loc[mask].copy()
+
+        cliente = ClienteAPI(base_url="https://api.11holidays.com")
+
+        df_api = cliente.obtener_datos(
+            endpoint="/v1/holidays",
+            params={"country": "CR"}  # parametros
+        )
+
+        df_filtrado = self.feriados_por_mes(df_filtrado, df_api)
+
+        df_filtrado = df_filtrado.dropna()
         if in_place:
             self._dataframe = df_filtrado
             self.calcular_metricas()
@@ -314,4 +328,37 @@ class GestorDatos:
         """Permite reemplazar el logger por uno propio (útil para tests)."""
         self._logger = logger
 
+    def feriados_por_mes(self, df_data: pd.DataFrame, df_feriados: pd.DataFrame) -> pd.DataFrame:
+
+        df_feriados["date"] = pd.to_datetime(df_feriados["date"], errors="coerce")
+        df_feriados["holiday_month"] = df_feriados["date"].dt.month
+
+        # Agrupar feriados por mes
+        df_holidays_month = (
+            df_feriados.groupby(["holiday_month"])
+            .agg(
+                cant_feriados=("name", "count"),
+                nombres_feriados=("name", lambda x: list(x))
+            )
+            .reset_index()
+        )
+
+        # Renombrar para que coincida con tu dataset
+        df_holidays_month = df_holidays_month.rename(columns={
+            "holiday_month": "month"
+        })
+
+        # Merge por mes con tus datos locales
+        df_final = df_data.merge(df_holidays_month, on=["month"], how="left")
+
+        # Rellenar valores faltantes con defaults
+        df_final["cant_feriados"] = df_final["cant_feriados"].fillna(0).astype(int)
+        df_final["nombres_feriados"] = df_final["nombres_feriados"].apply(
+            lambda x: x if isinstance(x, list) else ["No hay feriados en este mes"]
+        )
+
+        # Crear indicador binario si el mes contiene al menos un feriado
+        df_final["es_feriado_mes"] = (df_final["cant_feriados"] > 0).astype(int)
+
+        return df_final
 # Fin del archivo
