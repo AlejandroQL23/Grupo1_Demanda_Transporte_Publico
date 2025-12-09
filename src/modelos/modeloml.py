@@ -15,6 +15,7 @@ from src.datos.gestor_datos import GestorDatos
 class ModeloML:
     def __init__(self):
         self.modelo = None
+        self.modelo_arbol = None
         self.X_train = None
         self.X_test = None
         self.y_train = None
@@ -54,7 +55,7 @@ class ModeloML:
         df_X = df_data.drop('pasajerosregulares', axis=1)
 
         #  dummies
-        df_X = pd.get_dummies(df_X, drop_first=True)
+        #df_X = pd.get_dummies(df_X, drop_first=True)
 
         print(f"\nNúmero de features después de encoding: {df_X.shape[1]}")
         print(f"Features: {list(df_X.columns)}")
@@ -654,8 +655,6 @@ class ModeloML:
         probabilidades = modelo.predict_proba(df_X.values)
 
         return predicciones, probabilidades
-
-
 
 
 
