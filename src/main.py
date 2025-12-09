@@ -23,8 +23,10 @@ Opciones:
 """
 
 from pathlib import Path
-from datos.gestor_datos import GestorDatos
-from basedatos.gestor_base_datos import ConexionSQLite, IntegradorDatos
+
+from src.basedatos.gestor_base_datos import ConexionSQLite, IntegradorDatos
+from src.datos.gestor_datos import GestorDatos
+from src.modelos.modeloml import ModeloML
 
 
 def main():
@@ -77,7 +79,9 @@ def main():
         print("\n=== MENÚ DE INTEGRACIÓN ===")
         print("1) Integrar TODOS los datos en tabla 'pasajeros'")
         print("2) Integrar SOLO Cartago en tabla 'pasajeros_cartago' y guardar CSV filtrado")
-        print("3) Salir")
+        print("3) Modelo Regresion Lineal")
+        print("4) Modelo ")
+        print("5) Salir")
 
         opcion = input("Selecciona una opción (1-3): ").strip()
 
@@ -126,6 +130,14 @@ def main():
                 print(f"ERROR al integrar solo Cartago: {e}")
 
         elif opcion == "3":
+            modelo1 = ModeloML()
+            modelo1.regresion()
+
+        elif opcion == "4":
+            modelo1 = ModeloML()
+            modelo1.clasificacion()
+
+        elif opcion == "5":
             print("\nSaliendo y cerrando conexión...")
             break
         else:
