@@ -60,5 +60,15 @@ git clone https://github.com/AlejandroQL23/Grupo1_Demanda_Transporte_Publico.git
 cd Grupo1_Demanda_Transporte_Publico
 ```
 
+## Modulos
+
+- data (todos los datos necesarios crudos y procesados)
+- notebooks (consultas SQL)
+- api, usadas para tener los feriados
+- basedatos, conexión a la BD
+- eda
+- modelos, modelos de predicción
+- visualización, gráficos mostrando información importante
+  
 
 </div>
