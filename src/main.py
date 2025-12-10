@@ -1,20 +1,3 @@
-#from src.api.cliente_api import ClienteAPI
-
-
-#def main():
-#    cliente = ClienteAPI(base_url="https://api.11holidays.com")
-#
-#    df = cliente.obtener_datos(
-#        endpoint="/v1/holidays",
-#        params={"country": "CR"}  # parametros
-#    )
-
-#    print(df)
-
-# if __name__ == "__main__":
-#    main()
-
-# src/main.py
 """
 Main de integración usando rutas ABSOLUTAS.
 Opciones:
@@ -79,8 +62,8 @@ def main():
         print("\n=== MENÚ DE INTEGRACIÓN ===")
         print("1) Integrar TODOS los datos en tabla 'pasajeros'")
         print("2) Integrar SOLO Cartago en tabla 'pasajeros_cartago' y guardar CSV filtrado")
-        print("3) Modelo Regresion Lineal")
-        print("4) Modelo ")
+        print("3) Modelo Supervisado - Regresión")
+        print("4) Modelo Supervisado - Clasificación (Regresión logística) ")
         print("5) Salir")
 
         opcion = input("Selecciona una opción (1-5): ").strip()
