@@ -44,7 +44,19 @@ class ModeloML:
             'year_norm'
         ]
 
+        entradasGuia = [
+            'month', 'dia_semana', 'es_fin_semana',  # relacion dias
+            'es_feriado_mes', 'cant_feriados', 'feriado_finde',  # dias especiales
+            'precipitacion_mm', 'temperatura_c',  # clima
+            'ruta_promedio_pasajeros', 'proporcion_adultos_mayor',  # ruta
+            'year_norm', 'pasajerostotales'
+        ]
+
+        test=df_data[entradasGuia]
+        test.to_csv("data/test/entradas_regresion_con_pax.csv", index=False)
+
         X = df_data[entradas]
+        X.to_csv("data/test/entradas_filtradas_regresion.csv", index=False)
         y = df_data['pasajerostotales']  #  objetivo
 
         print(f"\nFeatures utilizadas: {len(entradas)}")
@@ -153,6 +165,7 @@ class ModeloML:
         cargador = GestorDatos(ruta_base="data/processed")
         df_data = cargador.transformar("cartago.csv")
 
+
         print(f"\nDatos cargados: {df_data.shape[0]} registros")
 
         # 2 variable objetivo usando cuartiles 25% cada uno, usando tot pax
@@ -195,7 +208,18 @@ class ModeloML:
             'es_feriado_mes', 'precipitacion_mm', 'temperatura_c',
         ]
 
+        entradasGuia = [
+            'pasajerostotales', 'pasajerosregulares', 'pasajerosadultomayor',
+            'month', 'dia_semana', 'es_fin_semana',
+            'ruta_promedio_pasajeros',
+            'es_feriado_mes', 'precipitacion_mm', 'temperatura_c', 'nivel_ocupacion'
+        ]
+
+        test = df_data[entradasGuia]
+        test.to_csv("data/test/entradas_clasif_con_ocupa.csv", index=False)
+
         X = df_data[entradas]
+        X.to_csv("data/test/entradas_filtradas_clasif.csv", index=False)
         y = df_data['nivel_ocupacion']
 
         print(f"\nFeatures utilizadas: {len(entradas)}")
@@ -339,3 +363,31 @@ class ModeloML:
         plt.savefig('feature_importance_clasificacion.png', dpi=300)
         print("Importancia de features guardada en: feature_importance_clasificacion.png")
         plt.close()
+
+    def probar_modelo(self):
+        # cargar modelo y scaler
+        modelo = joblib.load("mejor_modelo_regresion.pkl")
+        scaler = joblib.load("scaler_regresion.pkl")
+
+        #  cargar prueba
+        X_new = pd.read_csv("data/test/entradas_filtradas_regresion.csv")
+
+        # escalar y predecir
+        X_new_scaled = scaler.transform(X_new)
+        predicciones = modelo.predict(X_new_scaled)
+
+        print(predicciones)
+
+    def probar_modelo2(self):
+        # cargar modelo y scaler
+        modelo = joblib.load("mejor_modelo_clasificacion.pkl")
+        scaler = joblib.load("scaler_clasificacion.pkl")
+
+        #  cargar prueba
+        X_new = pd.read_csv("data/test/entradas_filtradas_clasif.csv")
+
+        # escalar y predecir
+        X_new_scaled = scaler.transform(X_new)
+        predicciones = modelo.predict(X_new_scaled)
+
+        print(predicciones)
