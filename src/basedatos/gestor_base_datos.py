@@ -290,32 +290,45 @@ class IntegradorDatos:
         if columna not in df.columns:
             raise KeyError(f"La columna '{columna}' no existe en el DataFrame.")
 
-        mask = df[columna].astype(str).str.contains(patron, case=case_sensitive, na=False, regex=regex)
+        # 1) Filtrar filas que cumplan el patrón
+        mask = df[columna].astype(str).str.contains(
+            patron,
+            case=case_sensitive,
+            na=False,
+            regex=regex
+        )
         df_subset = df.loc[mask].copy()
 
-        if ruta_csv_guardado:
-            dest = Path(ruta_csv_guardado)
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            df_subset.to_csv(dest, index=False)
-
+        # Si no hay filas que cumplan el filtro, no hacemos nada
         if df_subset.empty:
             return 0
 
+        # 2) Preparar el subset (aquí se crea 'pasajerostotales')
         df_proc = self.preparar_dataframe(df_subset)
 
+        # 3) Guardar CSV YA PROCESADO (con pasajerostotales)
+        if ruta_csv_guardado:
+            dest = Path(ruta_csv_guardado)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            df_proc.to_csv(dest, index=False)
+
+        # 4) Evaluar PK y crear tabla
         pk, _ = self.evaluar_pk(df_proc, pk_candidata)
         try:
             self.crear_tabla_desde_dataframe(df_proc, nombre_tabla, pk=pk)
         except Exception:
             self.crear_tabla_desde_dataframe(df_proc, nombre_tabla, pk=None)
 
+        # 5) Insertar datos
         inserted = self.insertar_dataframe(df_proc, nombre_tabla, pk=pk, chunk_size=chunk_size)
 
+        # 6) Crear índices
         idx_cols = [c for c in ("year", "month", "codigoruta", "nombreruta") if c in df_proc.columns]
         if idx_cols:
             self.crear_indice(nombre_tabla, idx_cols)
 
         return inserted
+
 
 
 # ------------------ Ejemplo de uso (comentado) ------------------
