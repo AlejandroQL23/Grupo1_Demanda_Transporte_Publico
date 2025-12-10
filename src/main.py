@@ -115,10 +115,12 @@ def main():
         elif opcion == "3":
             modelo1 = ModeloML()
             modelo1.regresion()
+            modelo1.probar_modelo()
 
         elif opcion == "4":
-            modelo1 = ModeloML()
-            modelo1.clasificacion()
+            modelo2 = ModeloML()
+            modelo2.clasificacion()
+            modelo2.probar_modelo2()
 
         elif opcion == "5":
             print("\nSaliendo y cerrando conexión...")
