@@ -69,18 +69,18 @@ class ModeloML:
             'Ridge Regression': Ridge(alpha=1.0, random_state=42),
             'KNN': KNeighborsRegressor(n_neighbors=5),
             'Random Forest': RandomForestRegressor(
-                n_estimators=100,
-                max_depth=15,
-                min_samples_split=5,
+                n_estimators=70, # numero de arboles
+                max_depth=7, # profundidad del arbol
+                min_samples_split=3, # muestras min para dividir un nodo
                 random_state=42,
-                n_jobs=-1
+                n_jobs=-1 # usa todos los nucleos
             ),
             'XGBoost': XGBRegressor(
-                n_estimators=100,
-                max_depth=7,
-                learning_rate=0.1,
+                n_estimators=59, # numero de arboles
+                max_depth=9, # profundidad
+                learning_rate=0.1, # aprendizaje (a + bajo + estable + arboles)
                 random_state=42,
-                n_jobs=-1
+                n_jobs=-1 # usa todos lo nucleos
             )
         }
 
@@ -217,7 +217,7 @@ class ModeloML:
         # 6 modelo
         modelos = {
             'Logistic Regression': LogisticRegression(
-                max_iter=1000,
+                max_iter=1000, # numero max de iteraciones
                 random_state=42
             )
         }
