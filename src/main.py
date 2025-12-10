@@ -1,20 +1,3 @@
-#from src.api.cliente_api import ClienteAPI
-
-
-#def main():
-#    cliente = ClienteAPI(base_url="https://api.11holidays.com")
-#
-#    df = cliente.obtener_datos(
-#        endpoint="/v1/holidays",
-#        params={"country": "CR"}  # parametros
-#    )
-
-#    print(df)
-
-# if __name__ == "__main__":
-#    main()
-
-# src/main.py
 """
 Main de integración usando rutas ABSOLUTAS.
 Opciones:
@@ -23,8 +6,10 @@ Opciones:
 """
 
 from pathlib import Path
-from datos.gestor_datos import GestorDatos
-from basedatos.gestor_base_datos import ConexionSQLite, IntegradorDatos
+
+from src.basedatos.gestor_base_datos import ConexionSQLite, IntegradorDatos
+from src.datos.gestor_datos import GestorDatos
+from src.modelos.modeloml import ModeloML
 
 
 def main():
@@ -77,9 +62,11 @@ def main():
         print("\n=== MENÚ DE INTEGRACIÓN ===")
         print("1) Integrar TODOS los datos en tabla 'pasajeros'")
         print("2) Integrar SOLO Cartago en tabla 'pasajeros_cartago' y guardar CSV filtrado")
-        print("3) Salir")
+        print("3) Modelo Supervisado - Regresión")
+        print("4) Modelo Supervisado - Clasificación (Regresión logística) ")
+        print("5) Salir")
 
-        opcion = input("Selecciona una opción (1-3): ").strip()
+        opcion = input("Selecciona una opción (1-5): ").strip()
 
         if opcion == "1":
             # Integrar todo el DataFrame en la tabla 'pasajeros'
@@ -126,6 +113,14 @@ def main():
                 print(f"ERROR al integrar solo Cartago: {e}")
 
         elif opcion == "3":
+            modelo1 = ModeloML()
+            modelo1.regresion()
+
+        elif opcion == "4":
+            modelo1 = ModeloML()
+            modelo1.clasificacion()
+
+        elif opcion == "5":
             print("\nSaliendo y cerrando conexión...")
             break
         else:
