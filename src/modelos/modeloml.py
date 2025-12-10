@@ -376,7 +376,8 @@ class ModeloML:
         X_new_scaled = scaler.transform(X_new)
         predicciones = modelo.predict(X_new_scaled)
 
-        print(predicciones)
+        print(predicciones.tolist())
+
 
     def probar_modelo2(self):
         # cargar modelo y scaler
@@ -390,4 +391,5 @@ class ModeloML:
         X_new_scaled = scaler.transform(X_new)
         predicciones = modelo.predict(X_new_scaled)
 
-        print(predicciones)
+        print(predicciones.tolist())
+
